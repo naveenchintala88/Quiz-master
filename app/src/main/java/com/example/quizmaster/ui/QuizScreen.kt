@@ -1,90 +1,103 @@
 package com.example.quizmaster.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.quizmaster.viewmodel.QuizViewModel
 
 @Composable
-fun QuizScreen(viewModel: QuizViewModel = viewModel(), category: Int, onFinish: () -> Unit) {
-    // Observe quiz questions and selected answers from the ViewModel
-    val quizQuestions by viewModel.quizQuestions.observeAsState(emptyList())
-    val selectedAnswers by viewModel.selectedAnswers.observeAsState(emptyMap())
-    var currentIndex by remember { mutableStateOf(0) }
+fun QuizScreen(navController: NavController, category: String, username: String) {
+    val quizViewModel: QuizViewModel = viewModel()
 
-    // Check if there are questions to display
-    if (quizQuestions.isNotEmpty()) {
-        val question = quizQuestions[currentIndex]
+    // Collect questions and loading state from ViewModel
+    val questions by quizViewModel.questions.collectAsState(emptyList())
+    val isLoading by quizViewModel.loading.collectAsState(false)
+
+    var currentQuestionIndex by remember { mutableStateOf(0) }
+    var score by remember { mutableStateOf(0) }
+    var selectedOption by remember { mutableStateOf("") }
+
+    // Fetch questions when the composable is first displayed
+    LaunchedEffect(Unit) {
+        quizViewModel.loadQuestions(category)
+    }
+
+    if (isLoading) {
+        // Show loading spinner
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else if (questions.isNotEmpty()) {
+        // Display the current question and options
+        val currentQuestion = questions[currentQuestionIndex]
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp)
         ) {
-            Text(
-                text = "Question ${currentIndex + 1}/${quizQuestions.size}",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = question.question, style = MaterialTheme.typography.bodyLarge)
-
+            Text("Category: $category", style = MaterialTheme.typography.h6)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display Options
-            question.options.forEach { option ->
-                val isSelected = selectedAnswers[currentIndex] == option
-                Card(
+            Text("Question ${currentQuestionIndex + 1}: ${currentQuestion.question}", style = MaterialTheme.typography.body1)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            currentQuestion.options.forEach { option ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { viewModel.selectAnswer(currentIndex, option) }
-                        .background(if (isSelected) Color.Green else MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(8.dp)
+                        .padding(8.dp)
+                        .clickable { selectedOption = option }
                 ) {
-                    Text(
-                        text = option,
-                        modifier = Modifier.padding(16.dp),
-                        color = if (isSelected) Color.White else Color.Black
+                    RadioButton(
+                        selected = selectedOption == option,
+                        onClick = { selectedOption = option }
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(option)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Navigation Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (currentIndex > 0) {
-                    Button(onClick = { currentIndex-- }) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                if (currentQuestionIndex > 0) {
+                    Button(onClick = { currentQuestionIndex-- }) {
                         Text("Previous")
                     }
                 }
-
-                if (currentIndex < quizQuestions.size - 1) {
-                    Button(onClick = { currentIndex++ }) {
+                if (currentQuestionIndex < questions.size - 1) {
+                    Button(onClick = {
+                        if (selectedOption == currentQuestion.correctAnswer) {
+                            score++
+                        }
+                        currentQuestionIndex++
+                        selectedOption = "" // Reset selected option
+                    }) {
                         Text("Next")
                     }
                 } else {
-                    Button(onClick = onFinish) {
+                    Button(onClick = {
+                        if (selectedOption == currentQuestion.correctAnswer) {
+                            score++
+                        }
+                        navController.navigate("result/$score/$username")
+                    }) {
                         Text("Finish")
                     }
                 }
             }
         }
     } else {
-        // Optionally, display a loading indicator or a message if there are no questions
-        Text(text = "Loading questions...", style = MaterialTheme.typography.bodyLarge)
+        // Display a message when no questions are available
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No questions available", style = MaterialTheme.typography.body1)
+        }
     }
 }

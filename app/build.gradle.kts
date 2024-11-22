@@ -41,6 +41,9 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.3.0"
+    }
 }
 
 dependencies {
@@ -53,6 +56,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -86,4 +90,35 @@ dependencies {
 
     // lottie
     implementation (libs.lottie.compose)
+
+
+
+    // Compose and Material
+    implementation ("androidx.compose.ui:ui:1.5.1")
+    implementation ("androidx.compose.material:material:1.5.1")
+    implementation ("androidx.compose.ui:ui-tooling:1.5.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+
+// Retrofit for API
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+// Room for Database
+    implementation ("androidx.room:room-runtime:2.5.2")
+    kapt ("androidx.room:room-compiler:2.5.2")
+
+// Kotlin Coroutines
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Other dependencies
+    implementation ("androidx.room:room-runtime:2.6.0")
+    implementation ("androidx.room:room-ktx:2.6.0")
+    kapt ("androidx.room:room-compiler:2.6.0")
+
+    // Jetpack Compose's StateFlow and Flow support
+    implementation ("androidx.compose.runtime:runtime-livedata:1.4.0") // For Flow support in Compose
+
+    // Coroutine dependencies
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
+
 }
