@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    private const val BASE_URL = "https://your-api-url.com/" // Replace with your API base URL
+    private const val BASE_URL = "https://opentdb.com/"
 
     val api: QuizApi by lazy {
         Retrofit.Builder()

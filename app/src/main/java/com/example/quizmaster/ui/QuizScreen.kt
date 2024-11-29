@@ -1,12 +1,18 @@
 package com.example.quizmaster.ui
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.quizmaster.viewmodel.QuizViewModel
@@ -14,88 +20,122 @@ import com.example.quizmaster.viewmodel.QuizViewModel
 @Composable
 fun QuizScreen(navController: NavController, category: String, username: String) {
     val quizViewModel: QuizViewModel = viewModel()
-
-    // Collect questions and loading state from ViewModel
     val questions by quizViewModel.questions.collectAsState(emptyList())
     val isLoading by quizViewModel.loading.collectAsState(false)
 
-    var currentQuestionIndex by remember { mutableStateOf(0) }
-    var score by remember { mutableStateOf(0) }
+    var currentQuestionIndex by remember { mutableIntStateOf(0) }
+    var score by remember { mutableIntStateOf(0) }
     var selectedOption by remember { mutableStateOf("") }
 
-    // Fetch questions when the composable is first displayed
-    LaunchedEffect(Unit) {
+    LaunchedEffect(category) {
         quizViewModel.loadQuestions(category)
     }
 
     if (isLoading) {
-        // Show loading spinner
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.size(64.dp), color = MaterialTheme.colors.primary)
         }
     } else if (questions.isNotEmpty()) {
-        // Display the current question and options
         val currentQuestion = questions[currentQuestionIndex]
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF81D4FA),
+                            Color(0xFF9575CD)
+                        )
+                    )
+                )
                 .padding(16.dp)
         ) {
-            Text("Category: $category", style = MaterialTheme.typography.h6)
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Category: $category",
+                style = MaterialTheme.typography.h6.copy(fontSize = 22.sp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-            Text("Question ${currentQuestionIndex + 1}: ${currentQuestion.question}", style = MaterialTheme.typography.body1)
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Question ${currentQuestionIndex + 1}: ${currentQuestion.question}",
+                style = MaterialTheme.typography.h6.copy(fontSize = 20.sp),
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
 
             currentQuestion.options.forEach { option ->
-                Row(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable { selectedOption = option }
+                        .padding(vertical = 8.dp)
+                        .clickable {
+                            selectedOption = option
+                        },
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = 4.dp,
+                    backgroundColor = if (selectedOption == option) Color.LightGray else Color.White
                 ) {
-                    RadioButton(
-                        selected = selectedOption == option,
-                        onClick = { selectedOption = option }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(option)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedOption == option,
+                            onClick = { selectedOption = option }
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(text = option, style = MaterialTheme.typography.body1.copy(fontSize = 16.sp))
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 if (currentQuestionIndex > 0) {
-                    Button(onClick = { currentQuestionIndex-- }) {
+                    Button(
+                        onClick = { currentQuestionIndex-- },
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Previous")
                     }
                 }
+                Spacer(modifier = Modifier.width(8.dp))
+
                 if (currentQuestionIndex < questions.size - 1) {
-                    Button(onClick = {
-                        if (selectedOption == currentQuestion.correctAnswer) {
-                            score++
-                        }
-                        currentQuestionIndex++
-                        selectedOption = "" // Reset selected option
-                    }) {
+                    Button(
+                        onClick = {
+                            if (selectedOption == currentQuestion.correctAnswer) {
+                                score++
+                            }
+                            currentQuestionIndex++
+                            selectedOption = ""
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Next")
                     }
                 } else {
-                    Button(onClick = {
-                        if (selectedOption == currentQuestion.correctAnswer) {
-                            score++
-                        }
-                        navController.navigate("result/$score/$username")
-                    }) {
+                    Button(
+                        onClick = {
+                            if (selectedOption == currentQuestion.correctAnswer) {
+                                score++
+                            }
+                            navController.navigate("result/$score/$username")
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Finish")
                     }
                 }
             }
         }
     } else {
-        // Display a message when no questions are available
+
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No questions available", style = MaterialTheme.typography.body1)
         }

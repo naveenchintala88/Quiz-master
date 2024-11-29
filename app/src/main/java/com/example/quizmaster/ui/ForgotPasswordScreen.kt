@@ -8,14 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -24,10 +22,10 @@ import com.example.quizmaster.data.QuizDatabase
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController, database: QuizDatabase) {
+fun ForgotPasswordScreen(navController: NavController, database: QuizDatabase) {
     var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmationMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
@@ -36,7 +34,7 @@ fun LoginScreen(navController: NavController, database: QuizDatabase) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(MaterialTheme.colors.primary, MaterialTheme.colors.primaryVariant)
+                    colors = listOf(Color(0xFFBBDEFB), Color(0xFF2196F3))
                 )
             )
     ) {
@@ -48,8 +46,8 @@ fun LoginScreen(navController: NavController, database: QuizDatabase) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.login_illustration),
-                contentDescription = "Login Illustration",
+                painter = painterResource(id = R.drawable.forgot_password_illustration),
+                contentDescription = "Forgot Password Illustration",
                 modifier = Modifier.size(120.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -65,8 +63,8 @@ fun LoginScreen(navController: NavController, database: QuizDatabase) {
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Welcome Back!",
-                        style = MaterialTheme.typography.h5,
+                        text = "Reset Your Password",
+                        style = MaterialTheme.typography.h6,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -76,29 +74,18 @@ fun LoginScreen(navController: NavController, database: QuizDatabase) {
                         onValueChange = { username = it },
                         label = { Text("Username") },
                         leadingIcon = {
-                            Icon(Icons.Default.Person, contentDescription = "Username Icon")
+                            Icon(Icons.Default.Lock, contentDescription = "Username Icon")
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password") },
+                        value = newPassword,
+                        onValueChange = { newPassword = it },
+                        label = { Text("New Password") },
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = "Password Icon")
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    painter = painterResource(
-                                        if (passwordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
-                                    ),
-                                    contentDescription = "Toggle Password Visibility"
-                                )
-                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -107,47 +94,60 @@ fun LoginScreen(navController: NavController, database: QuizDatabase) {
                     Button(
                         onClick = {
                             scope.launch {
-                                val user = database.userDao().getUser(username, password)
-                                if (user != null) {
-                                    navController.navigate("home/${user.username}")
+                                if (username.isEmpty() || username.length < 3) {
+                                    errorMessage = "Invalid username: Must be at least 3 characters long"
+                                    confirmationMessage = ""
+                                } else if (newPassword.isEmpty() || newPassword.length < 6) {
+                                    errorMessage = "Password must be at least 6 characters long"
+                                    confirmationMessage = ""
                                 } else {
-                                    errorMessage = "Invalid credentials. Please try again."
+                                    val user = database.userDao().getUserByUsername(username)
+                                    if (user != null) {
+                                        database.userDao().updatePassword(username, newPassword)
+                                        confirmationMessage = "Password updated successfully!"
+                                        errorMessage = ""
+                                        navController.navigate("login") {
+                                            popUpTo("forgotPassword") { inclusive = true }
+                                        }
+                                    } else {
+                                        errorMessage = "Username not found"
+                                        confirmationMessage = ""
+                                    }
                                 }
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Login", fontSize = 18.sp)
+                        Text("Reset Password", fontSize = 18.sp)
+                    }
+
+                    if (errorMessage.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colors.error,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+
+                    if (confirmationMessage.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = confirmationMessage,
+                            color = MaterialTheme.colors.primary,
+                            style = MaterialTheme.typography.body2
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (errorMessage.isNotEmpty()) {
-                Text(
-                    text = errorMessage,
-                    color = MaterialTheme.colors.error,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             TextButton(
-                onClick = { navController.navigate("forgotPassword") }
+                onClick = { navController.navigate("login") }
             ) {
-                Text("Forgot Password?", color = MaterialTheme.colors.onPrimary)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextButton(
-                onClick = { navController.navigate("signup") }
-            ) {
-                Text("Sign Up", color = MaterialTheme.colors.onPrimary)
+                Text("Back to Login", color = MaterialTheme.colors.onPrimary)
             }
         }
     }

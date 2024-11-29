@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class HighScore(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val name: String, // Player's name
-    val score: Int,   // Player's score
-    val date: Long    // Date of the score
+    val name: String,
+    val score: Int,
+    val date: Long
 )

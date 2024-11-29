@@ -1,5 +1,6 @@
 package com.example.quizmaster.api
 
+import com.example.quizmaster.data.CategoryResponse
 import com.example.quizmaster.data.QuizResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -12,5 +13,7 @@ interface QuizApi {
         @Query("difficulty") difficulty: String? = null,
         @Query("type") type: String? = null
     ): QuizResponse
-}
 
+    @GET("api_category.php")
+    suspend fun getCategories(): CategoryResponse
+}

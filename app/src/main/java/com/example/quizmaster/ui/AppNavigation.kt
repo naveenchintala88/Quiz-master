@@ -11,9 +11,11 @@ import com.example.quizmaster.data.QuizDatabase
 fun AppNavigation(database: QuizDatabase) {
     val navController: NavHostController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "signup") {
+    NavHost(navController = navController, startDestination = "welcome") {
+        composable("welcome") { WelcomeScreen(navController) }
         composable("signup") { SignUpScreen(navController, database) }
         composable("login") { LoginScreen(navController, database) }
+        composable("forgotPassword") { ForgotPasswordScreen(navController, database) }
         composable("home/{username}") { backStackEntry ->
             val username = backStackEntry.arguments?.getString("username") ?: "Guest"
             HomeScreen(navController, username)
