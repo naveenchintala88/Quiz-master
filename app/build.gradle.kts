@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
@@ -15,6 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.example.quizmaster"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -57,6 +59,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -65,60 +69,49 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
-    //Splash Api
+    
     implementation (libs.androidx.core.splashscreen)
 
-    //Compose Navigation
-    val nav_version = "2.7.7"
     implementation (libs.androidx.navigation.compose)
 
-    //Dagger Hilt
     implementation (libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation (libs.androidx.hilt.navigation.compose)
 
-    //Retrofit
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
 
-    //Compose Foundation
     implementation (libs.androidx.foundation)
 
-    //Accompanist
     implementation (libs.accompanist.systemuicontroller)
 
-    // lottie
     implementation (libs.lottie.compose)
 
+    implementation (libs.ui)
+    implementation (libs.androidx.material)
+    implementation (libs.ui.tooling)
+    implementation (libs.androidx.lifecycle.runtime.compose)
+
+    implementation (libs.retrofit.v2110)
+    implementation (libs.converter.gson.v2110)
+
+    implementation (libs.kotlinx.coroutines.android.v173)
 
 
-    // Compose and Material
-    implementation ("androidx.compose.ui:ui:1.5.1")
-    implementation ("androidx.compose.material:material:1.5.1")
-    implementation ("androidx.compose.ui:ui-tooling:1.5.1")
-    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation (libs.androidx.room.runtime)
+    implementation (libs.androidx.room.ktx)
 
-// Retrofit for API
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    //noinspection KaptUsageInsteadOfKsp
+    kapt (libs.androidx.room.compiler)
 
-// Room for Database
-    implementation ("androidx.room:room-runtime:2.5.2")
-    kapt ("androidx.room:room-compiler:2.5.2")
 
-// Kotlin Coroutines
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation (libs.androidx.runtime.livedata.v140)
 
-    // Other dependencies
-    implementation ("androidx.room:room-runtime:2.6.0")
-    implementation ("androidx.room:room-ktx:2.6.0")
-    kapt ("androidx.room:room-compiler:2.6.0")
 
-    // Jetpack Compose's StateFlow and Flow support
-    implementation ("androidx.compose.runtime:runtime-livedata:1.4.0") // For Flow support in Compose
+    implementation (libs.jetbrains.kotlinx.coroutines.android)
 
-    // Coroutine dependencies
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
 }

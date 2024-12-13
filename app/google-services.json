@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "479238278004",
+    "project_id": "quiz-master-fcdac",
+    "storage_bucket": "quiz-master-fcdac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:479238278004:android:60a5a029a6a471b8e27a21",
+        "android_client_info": {
+          "package_name": "com.example.quizmaster"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKFGpoxkRI9iS7Ksm6OF7Copsiu5glprg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
